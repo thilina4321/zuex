@@ -11,10 +11,12 @@ const serviceRecord = new Schema(
     customerId: { type: Schema.Types.ObjectId, ref: "user" },
     vehicleId: { type: Schema.Types.ObjectId, ref: "vehicle" },
   },
-  {
+  { 
     timestamps: true,
   }
 );
 
 
-module.exports = mongoose.model("serviceRecords", serviceRecord);
+
+
+module.exports = mongoose.model("serviceRecord", serviceRecord);

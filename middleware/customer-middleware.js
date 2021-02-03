@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const Auth = require("../model/auth-model");
+const UserType  = require('../enum/userType')
 
 const auth = async (req, res, next) => {
   const token = req.header("Authorization").replace("Bearer ", "");
@@ -14,8 +15,11 @@ const auth = async (req, res, next) => {
       throw new Error('No access')
     }
 
-    req.superAdmin = user
-    req.token = token
+    if(user.role != UserType.CUSTOMER){
+        new Error('Access not allowed')
+    }
+
+    req.customer = user._id
     next();
 
   } catch (err) {

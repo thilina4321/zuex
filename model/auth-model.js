@@ -34,6 +34,19 @@ const user = new Schema({
   tokens: [{ token: String }],
 });
 
+
+user.virtual('records', {
+  ref:'serviceRecord',
+  localField:'_id',
+  foreignField:'customerId'
+})
+
+user.virtual('apointments', {
+  ref:'appointment',
+  localField:'_id',
+  foreignField:'customerId'
+})
+
 user.statics.loginWithEmailAndPassword = async (credential) => {
   const user = await User.findOne({ email: credential.email });
   if (!user) {

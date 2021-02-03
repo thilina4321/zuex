@@ -4,12 +4,14 @@ const app = express();
 
 const superAdminRouter = require("./router/super-admin.router");
 const serviceAgentRouter = require('./router/service-agent')
+const customerRouter = require('./router/customer-router')
 
 const port = 3000;
 
 app.use(express.json());
 app.use("/super-admin", superAdminRouter);
 app.use("/service-agent", serviceAgentRouter);
+app.use("/customer", customerRouter);
 
 app.listen(port, () => {
   mongoose

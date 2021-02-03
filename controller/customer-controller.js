@@ -1,6 +1,8 @@
 const User = require("../model/auth-model");
 const Vehicle = require('../model/vehicle-model')
 const UserType = require("../enum/userType");
+const ServiceRecords = require('../model/service-record-model')
+const Appointment = require('../model/apointment-model')
 
 const signupHelper = require("../helper/signup-helper");
 const loginHelper = require("../helper/login-helper");
@@ -46,8 +48,8 @@ exports.addVehicle = async(req,res)=>{
             carYear
         })
 
-        await vehicle.save()
-        res.send(vehicle)
+        const newVehicle = await vehicle.save()
+        res.send({message:'New vehicle created', newVehicle})
 
     } catch (error) {
         res.status(500).send(error.message)
@@ -80,9 +82,28 @@ exports.deleteVehicle = async(req,res)=>{
 }
 
 exports.viewServiceRecords = async(req,res)=>{
-
+    try {
+        const serviceRecords = await req.customer.populate('records').execPopulate()
+        res.send(serviceRecords)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
 }
 
 exports.makeAppointment = async(req,res)=>{
-    
+    const {date, serviceCategory} = req.body
+
+    try {
+        const appointment = new Appointment({
+            date,
+            serviceCategory,
+            customerId:req.customer,
+            vehicleId:req.vehicle
+        })
+
+        const newAppointment =  await appointment.save()
+        res.status(201).send({message:'New Appointment created successfully', newAppointment})
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
 }

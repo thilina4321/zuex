@@ -23,8 +23,8 @@ exports.createServiceRecord = async (req, res) => {
       vehicleId,
     });
 
-    await serviceRecord.save();
-    res.send({ message: "Service Record create successfully", serviceRecord });
+    const newserviceRecord = await serviceRecord.save();
+    res.send({ message: "Service Record create successfully", newserviceRecord });
 
   } catch (error) {
     res.status(500).send(error.message);
