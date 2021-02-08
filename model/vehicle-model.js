@@ -7,6 +7,9 @@ const vehicle = new Schema({
     type: String,
     required: [true, "Car number is required"],
   },
+  modelCode:{
+    type:String
+  },
   carColor: String,
   carYear: String,
 });
