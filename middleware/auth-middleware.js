@@ -13,8 +13,8 @@ const auth = async (req, res, next) => {
     if(!user){
       throw new Error('No access')
     }
-
-    req.superAdmin = user
+    
+    req.user = user._id
     req.token = token
     next();
 

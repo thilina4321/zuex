@@ -1,5 +1,7 @@
 const Vehicle = require("../model/vehicle-model");
 
+
+
 exports.editVehicleHelper = async (id, data) => {
   try {
     const updatedVehicle = await Vehicle.findByIdAndUpdate(id, data, {
@@ -14,7 +16,8 @@ exports.editVehicleHelper = async (id, data) => {
 
 exports.deleteVehicleHelper = async (id) => {
   try {
-    await Vehicle.findByIdAndDelete(id);
+    const user = await Vehicle.findByIdAndDelete(id);
+    return {user}
 
   } catch (error) {
       return {error:error.message}

@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const User = require('../model/auth-model')
 
 exports.userSignUp = async(email, password, contactNumber, userName, role)=>{
     try {
@@ -11,9 +12,12 @@ exports.userSignUp = async(email, password, contactNumber, userName, role)=>{
             role
         })
         const user = await newUser.save()
-        return user
+        return {user}
         
     } catch (error) {
-        new Error(error.message)
+        if(error.code == 11000){
+            return {error:'Email is already taken'}
+        }
+        return {error:error.message}
     }
 }

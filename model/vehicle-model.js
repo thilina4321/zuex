@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 // const validator = require('validation')
 
 const vehicle = new Schema({
+
+  owner:{type:Schema.Types.ObjectId, ref:'auth'
+  ,required:[true, 'owner is required']
+},
   carNumber: {
     type: String,
     required: [true, "Car number is required"],

@@ -16,10 +16,10 @@ const auth = async (req, res, next) => {
     }
 
     if(user.role != UserType.CUSTOMER){
-        new Error('Access not allowed')
+        throw new Error('Access not allowed')
     }
 
-    req.customer = user._id
+    // req.customer = user._id
     next();
 
   } catch (err) {

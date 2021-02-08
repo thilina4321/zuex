@@ -7,11 +7,16 @@ const Customer = require('../middleware/customer-middleware')
 
 router.post('/signup', customerController.registerCustomer)
 router.post('/login', customerController.loginCustomer)
+
 router.post('/add-vehicle',[Auth, Customer], customerController.addVehicle)
-router.patch('/update/:id',[Auth, Customer], customerController.editVehicle)
-router.delete('/delete/:id',[Auth, Customer], customerController.deleteVehicle)
+router.patch('/update-vehicle',[Auth, Customer], customerController.editVehicle)
+router.delete('/delete-vehicle',[Auth, Customer], customerController.deleteVehicle)
 router.get('/search',[Auth, Customer], customerController.viewServiceRecords)
+
+// appointment
 router.post('/appointment',[Auth, Customer], customerController.makeAppointment)
+router.get('/payment',[Auth, Customer], customerController.paymoney)
 
-
+ 
 module.exports = router
+ 

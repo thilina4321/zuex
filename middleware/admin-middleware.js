@@ -15,14 +15,15 @@ const auth = async (req, res, next) => {
       throw new Error('No access')
     }
 
-    if(user.role != UserType.SERVICE_AGENT){
+    if(user.role != UserType.SUPER_ADMIN){
         throw new Error('Access not allowed')
     }
 
+    // req.customer = user._id
     next();
 
   } catch (err) {
-    throw new Error(err);
+    res.status(422).send({error:err.message})
   }
 };
 

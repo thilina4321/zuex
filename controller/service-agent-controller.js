@@ -20,7 +20,7 @@ exports.createServiceRecord = async (req, res) => {
 
   try {
     const serviceRecord = new ServiceRecord({
-      serviceCategory,
+      serviceCategory, 
       customerId,
       vehicleId,
     });
@@ -38,7 +38,8 @@ exports.createServiceRecord = async (req, res) => {
 exports.searchServiceRecords = async (req, res) => {
   const match = {};
   const query = req.query;
-  const { customerId, vehicleId } = req.body;
+  console.log(query);
+  const { customerId, vehicleId } = req.query;
 
   if (query) {
     if (query.customerId) {
@@ -46,7 +47,9 @@ exports.searchServiceRecords = async (req, res) => {
     } else if (query.vehicleId) {
       match.vehicleId = vehicleId;
     }
-  }
+  } 
+
+  console.log(match);
 
   try {
     const searchResult = await ServiceRecord.find(match);
@@ -57,12 +60,11 @@ exports.searchServiceRecords = async (req, res) => {
 };
 
 exports.updateServiceRecord = async (req, res) => {
-  const id = req.params.id;
   const data = req.body;
 
   try {
     const updateServiceRecord = await ServiceRecord.findByIdAndUpdate(
-      id,
+      data.id,
       data,
       { runValidators: true, new: true }
     );
@@ -74,11 +76,11 @@ exports.updateServiceRecord = async (req, res) => {
 };
 
 exports.deleteServiceRecords = async (req, res) => {
-  const id = req.params.id;
+  const {id} = req.body;
 
   try {
-    await ServiceRecord.findById(id);
-    res.send({ message: "Delete records successfully" });
+    const deletedRecord = await ServiceRecord.findByIdAndDelete(id);
+    res.send({ message: "Delete records successfully", delete:deletedRecord });
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -98,8 +100,7 @@ exports.approveOrRejectAppointment = async (req, res) => {
 
       return res.send({ message: "Reject appointment", appointment });
     }
-
-
+    
     const appointment = await Appointment.findByIdAndUpdate(
       appointmentId,
       { approveStatus: AppointmentType.APPROVE, price },

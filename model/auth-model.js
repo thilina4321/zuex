@@ -9,7 +9,7 @@ const user = new Schema({
   email: {
     type: String,
     required: [true, "Email required"],
-    unique: [true, "Email already taken"],
+    unique: true,
     validate(value) {
       if (!validator.isEmail(value)) {
         new Error("Please Enter valid Email");

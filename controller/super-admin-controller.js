@@ -9,17 +9,23 @@ const customerHelper = require('../helper/customer-helper')
 exports.createSuperAdmin = async (req, res) => {
   const { email, password, contactNumber, userName } = req.body;
   try {
-    const superAdmin = await signupHelper.userSignUp(
+    const {user, error} = await signupHelper.userSignUp(
       email,
       password,
       contactNumber,
-      userName,
+      userName, 
       UserType.SUPER_ADMIN
     );
+
+    if(error){
+      return res.status(500).send({error});
+    }
+
     res.send({
       message: "Signed up successfully you can login now!!",
-      superAdmin
+      superAdmin:user
     });
+    
   } catch (error) {
     res.status(500).send("Server Error");
   }
@@ -29,26 +35,56 @@ exports.loginSuperAdmin = async (req, res) => {
   const data = req.body;
 
   try {
-    const { user, token } = await loginHelper.userLogin(data, User);
+    const { user, token,error } = await loginHelper.userLogin(data, User);
+    if(error){
+      return res.status(500).send({error:error.message});
+    }
     res.send({ user, token });
   } catch (error) {
-    res.status(500).send(error.message);
   }
 };
 
 exports.createServiceAgent = async (req, res) => {
   const { email, password, contactNumber, userName } = req.body;
+  console.log(req.user);
   try {
-    const serviceAgent = signupHelper.userSignUp(
+    const {user, error} = await signupHelper.userSignUp(
       email,
       password,
       contactNumber,
       userName,
       UserType.SERVICE_AGENT
     );
-    res.sand({ message: "Create Service agent successfully", serviceAgent });
+
+    if(error){
+      return res.status(500).send({error});
+    }
+    res.send({ message: "Create Service agent successfully", serviceAgent:user });
   } catch (error) {
-    res.status(500).send("Server Error");
+    res.status(500).send({error:error.message});
+  }
+};
+
+
+exports.createCustomer = async (req, res) => {
+  const { email, password, contactNumber, userName } = req.body;
+
+  try {
+    const {user,error} = await signupHelper.userSignUp(
+      email,
+      password,
+      contactNumber,
+      userName,
+      UserType.CUSTOMER
+    );
+
+    if(error){
+      return res.status(500).send({error});
+    }
+
+    res.send({ message: "customer created successfully", customer:user });
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 };
 
@@ -60,6 +96,7 @@ exports.customers = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 
 exports.deleteCustomer = async(req,res)=>{
   const {id} = req.body
@@ -75,12 +112,33 @@ exports.deleteCustomer = async(req,res)=>{
 exports.updateCustomer = async(req,res)=>{
   const data = req.body
   try {
-    await User.findByIdAndUpdate(data.id, {...data}, {runValidators:true, new:true})
-    res.send({message:'Update customer successfully'})
+    const updateCustomer = await User.findByIdAndUpdate(data.id, {...data}, {runValidators:true, new:true})
+    res.send({message:'Update customer successfully', customer:updateCustomer})
   } catch (error) {
     res.status(500).send({error:error.message})
   }
 }
+
+
+// vehicle section started
+
+exports.addVehicle = async (req, res) => {
+  const { carNumber, carYear, carColor, owner } = req.body;
+
+  try {
+    const vehicle = new Vehicle({
+      carNumber,
+      carColor,
+      carYear,
+      owner
+    });
+
+    const newVehicle = await vehicle.save();
+    res.send({ message: "New vehicle created", vehicle:newVehicle });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
 
 exports.vehicles = async (req, res) => {
   try {
@@ -93,25 +151,26 @@ exports.vehicles = async (req, res) => {
 
 exports.editVehicle = async (req, res) => {
   const data = req.body;
-  const id = req.params.id;
 
   try {
+    const { updatedVehicle, error } = await customerHelper.editVehicleHelper(data.id, data);
+
     if (error) {
       return res.status(500).send(error.message);
     }
-    res.send({ message: "updated vehicle successfully", updatedVehicle });
+    res.send({ message: "updated vehicle successfully", vehicle: updatedVehicle });
   } catch (error) {
     return res.status(500).send(error.message);
   }
 
-  const { updatedVehicle, error } = customerHelper.editVehicleHelper(id, data);
 };
 
 exports.deleteVehicle = async (req, res) => {
-  const id = req.params.id;
+
+  const {id} = req.body
 
   try {
-    const { error } = await customerHelper.deleteVehicleHelper(id);
+    const { user, error } = await customerHelper.deleteVehicleHelper(id);
     if (error) {
       return res.status(500).send(error.message);
     }
@@ -122,8 +181,30 @@ exports.deleteVehicle = async (req, res) => {
 };
 
 
+// service record section started
 
-exports.searchServiceRecordsOfSelectedUser = async()=>{
+exports.searchServiceRecords = async (req, res) => {
+  const match = {};
+  const query = req.query;
+  const { customerId, vehicleId } = req.body;
+
+  if (query) {
+    if (query.customerId) {
+      match.customerId = customerId;
+    } else if (query.vehicleId) {
+      match.vehicleId = vehicleId;
+    }
+  }
+
+  try {
+    const searchRecords = await ServiceRecord.find(match);
+    res.send(searchRecords);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+exports.recordsOfUser = async()=>{
     const id = req.params.id
 
     try {

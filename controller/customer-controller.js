@@ -1,18 +1,19 @@
 const User = require("../model/auth-model");
 const Vehicle = require("../model/vehicle-model");
-const UserType = require("../enum/userType");
-const ServiceRecords = require("../model/service-record-model");
 const Appointment = require("../model/apointment-model");
-
+const ServiceRecord = require("../model/service-record-model");
 const signupHelper = require("../helper/signup-helper");
 const loginHelper = require("../helper/login-helper");
 const customerHelper = require("../helper/customer-helper");
+
+const UserType = require("../enum/userType");
+const AppointmentType = require('../enum/appointment')
 
 exports.registerCustomer = async (req, res) => {
   const { email, password, contactNumber, userName } = req.body;
 
   try {
-    const customer = await signupHelper.userSignUp(
+    const {user,error} = await signupHelper.userSignUp(
       email,
       password,
       contactNumber,
@@ -20,7 +21,11 @@ exports.registerCustomer = async (req, res) => {
       UserType.CUSTOMER
     );
 
-    res.send({ message: "customer created successfully", customer });
+    if(error){
+      return res.status(422).send({error})
+    }
+
+    res.send({ message: "customer created successfully", customer:user });
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -31,6 +36,9 @@ exports.loginCustomer = async (req, res) => {
 
   try {
     const { user, token } = await loginHelper.userLogin(data, User);
+    if(user.role != UserType.CUSTOMER){
+      return res.status(404).send({error:"Can not find customer"})
+    }
     res.send({ user, token });
   } catch (error) {
     res.status(500).send(error.message);
@@ -38,13 +46,14 @@ exports.loginCustomer = async (req, res) => {
 };
 
 exports.addVehicle = async (req, res) => {
-  const { carNumber, carYear, carColor } = req.body;
+  const { carNumber, carYear, carColor,owner } = req.body;
 
   try {
     const vehicle = new Vehicle({
       carNumber,
       carColor,
       carYear,
+      owner,
     });
 
     const newVehicle = await vehicle.save();
@@ -56,18 +65,17 @@ exports.addVehicle = async (req, res) => {
 
 exports.editVehicle = async (req, res) => {
   const data = req.body;
-  const id = req.params.id;
 
   try {
+    const { updatedVehicle, error } = await customerHelper.editVehicleHelper(data.id, data);
     if (error) {
       return res.status(500).send(error.message);
     }
-    res.send({ message: "updated vehicle successfully", updatedVehicle });
+    res.send({ message: "updated vehicle successfully", vehicle:updatedVehicle });
   } catch (error) {
     return res.status(500).send(error.message);
   }
 
-  const { updatedVehicle, error } = customerHelper.editVehicleHelper(id, data);
 };
 
 exports.deleteVehicle = async (req, res) => {
@@ -86,12 +94,10 @@ exports.deleteVehicle = async (req, res) => {
 
 exports.viewServiceRecords = async (req, res) => {
   try {
-    const serviceRecords = await req.customer
-      .populate("records")
-      .execPopulate();
+    const serviceRecords = await ServiceRecord.find({ customerId: req.user });
     res.send(serviceRecords);
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({ error: error.message });
   }
 };
 
@@ -105,15 +111,29 @@ exports.makeAppointment = async (req, res) => {
       customerId: req.customer,
       vehicleId: req.vehicle,
     });
-
+ 
     const newAppointment = await appointment.save();
-    res
-      .status(201)
-      .send({
-        message: "New Appointment created successfully",
-        newAppointment,
-      });
+    res.status(201).send({
+      message: "New Appointment created successfully",
+      appointment:newAppointment,
+    });
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
+
+
+exports.paymoney = async(req,res)=>{
+  const id = req.params.id
+  try {
+    const appointment = await Appointment.findById(id)
+    if(appointment && appointment.appointmentStatus != AppointmentType.APPROVE){
+      return res.send(422).send({error:'Appointment is not accept yet'})
+    }
+
+    res.send(appointment)
+    
+  } catch (error) {
+    res.status(500).send({error:error.message})
+  }
+}
