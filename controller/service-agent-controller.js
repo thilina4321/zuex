@@ -11,7 +11,7 @@ exports.loginServiceAgent = async (req, res) => {
     const { user, token } = await loginHelper.userLogin(data, User);
     res.send({ user, token });
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
@@ -31,7 +31,7 @@ exports.createServiceRecord = async (req, res) => {
       newserviceRecord,
     });
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
@@ -49,13 +49,12 @@ exports.searchServiceRecords = async (req, res) => {
     }
   } 
 
-  console.log(match);
 
   try {
     const searchResult = await ServiceRecord.find(match);
     res.send(searchResult);
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
@@ -71,7 +70,7 @@ exports.updateServiceRecord = async (req, res) => {
 
     res.send(updateServiceRecord);
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
@@ -82,7 +81,7 @@ exports.deleteServiceRecords = async (req, res) => {
     const deletedRecord = await ServiceRecord.findByIdAndDelete(id);
     res.send({ message: "Delete records successfully", delete:deletedRecord });
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
@@ -110,5 +109,15 @@ exports.approveOrRejectAppointment = async (req, res) => {
     return res.send({ message: "Approve appoinment", appointment });
   } catch (error) {
     res.status(500).send({ message: error.message });
+  }
+};
+
+
+exports.searchAppointment = async (req, res) => { 
+  try {
+    const searchAppointment = await Appointment.find().populate("customerId vehicleId")
+    res.send(searchAppointment);
+  } catch (error) {
+    res.status(500).send({error:error.message});
   }
 };
