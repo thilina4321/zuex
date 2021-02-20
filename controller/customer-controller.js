@@ -5,9 +5,8 @@ const ServiceRecord = require("../model/service-record-model");
 const signupHelper = require("../helper/signup-helper");
 const loginHelper = require("../helper/login-helper");
 const customerHelper = require("../helper/customer-helper");
-
+const PaymentStatus = require('../enum/payment')
 const UserType = require("../enum/userType");
-const AppointmentType = require('../enum/appointment')
 
 exports.registerCustomer = async (req, res) => {
   const { email, password, contactNumber, userName } = req.body;
@@ -35,25 +34,26 @@ exports.loginCustomer = async (req, res) => {
   const data = req.body;
 
   try {
-    const { user, token } = await loginHelper.userLogin(data, User);
-    if(user.role != UserType.CUSTOMER){
-      return res.status(404).send({error:"Can not find customer"})
+    const { user, token, error } = await loginHelper.userLogin(data);
+    if(error){
+      return res.status(422).send({error})
     }
+    
     res.send({ user, token });
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send({error:error.message});
   }
 };
 
 exports.addVehicle = async (req, res) => {
-  const { carNumber, carYear, carColor,owner } = req.body;
+  const { carNumber, carYear, carColor } = req.body;
 
   try {
     const vehicle = new Vehicle({
       carNumber,
       carColor,
       carYear,
-      owner,
+      owner:req.user,
     });
 
     const newVehicle = await vehicle.save();
@@ -84,7 +84,11 @@ exports.deleteVehicle = async (req, res) => {
   try {
     const { error } = await customerHelper.deleteVehicleHelper(id);
     if (error) {
-      return res.status(500).send(error.message);
+      if(error === 'No customer found'){
+        return res.status(404).send({error});
+
+      }
+      return res.status(500).send({error});
     }
     res.send({ message: "Deleted vehicle successfully" });
   } catch (error) {
@@ -102,14 +106,14 @@ exports.viewServiceRecords = async (req, res) => {
 };
 
 exports.makeAppointment = async (req, res) => {
-  const { date, serviceCategory } = req.body;
+  const { date, serviceCategory,vehicleId } = req.body;
 
   try {
     const appointment = new Appointment({
-      date,
+      date:new Date(new Date(date)).getTime(),
       serviceCategory,
-      customerId: req.customer,
-      vehicleId: req.vehicle,
+      customerId: req.user,
+      vehicleId
     });
  
     const newAppointment = await appointment.save();
@@ -122,16 +126,24 @@ exports.makeAppointment = async (req, res) => {
   }
 };
 
+exports.availablePayments = async(req,res)=>{
+  try {
+    const available = await ServiceRecord.find({paymentStatus:PaymentStatus.NOT_PAID})
+    res.send({payments:available})
+  } catch (error) {
+    res.status(500).send({error:error.message})
+  }
+}
+
 
 exports.paymoney = async(req,res)=>{
-  const id = req.params.id
+  const {id, money} = req.body
   try {
-    const appointment = await Appointment.findById(id)
-    if(appointment && appointment.appointmentStatus != AppointmentType.APPROVE){
-      return res.send(422).send({error:'Appointment is not accept yet'})
-    }
+    const payment = await ServiceRecord.findByIdAndUpdate(id, {paid:money,
+      paymentStatus:PaymentStatus.PAID
+    })
 
-    res.send(appointment)
+    res.send({payment})
     
   } catch (error) {
     res.status(500).send({error:error.message})

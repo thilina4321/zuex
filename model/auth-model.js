@@ -50,7 +50,7 @@ user.virtual('apointments', {
 user.statics.loginWithEmailAndPassword = async (credential) => {
   const user = await User.findOne({ email: credential.email });
   if (!user) {
-    throw new Error("Loging failed");
+    throw new Error("Invalid email address");
   }
 
   const compare = await bcrypt.compare(credential.password, user.password);
@@ -75,9 +75,7 @@ user.methods.generateToken = async function () {
   const user = this;
 
   try {
-    const token = jwt.sign({ id: user._id }, "thisisthesecretkey", {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: user._id }, "thisisthesecretkey");
     user.tokens = user.tokens.concat({ token });
     await user.save();
     return token;
@@ -86,6 +84,6 @@ user.methods.generateToken = async function () {
   }
 };
 
-const User = mongoose.model("customer", user);
+const User = mongoose.model("user", user);
 
 module.exports = User;

@@ -12,17 +12,17 @@ const auth = async (req, res, next) => {
     });
 
     if(!user){
-      throw new Error('No access')
+      return res.status(422).send({error:'Access not allowed'})
     }
 
     if(user.role != UserType.SERVICE_AGENT){
-        throw new Error('Access not allowed')
+        return res.status(422).send({error:'Access not allowed'})
     }
 
     next();
 
   } catch (err) {
-    throw new Error(err);
+    return res.status(500).send({error:error.message})
   }
 };
 

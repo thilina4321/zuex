@@ -1,10 +1,13 @@
-exports.userLogin = async(data, Model) => {
+const User = require('../model/auth-model')
+
+exports.userLogin = async(data) => {
   
     try {
-      const user = await Model.loginWithEmailAndPassword(data);
+      const user = await User.loginWithEmailAndPassword(data);
       const token = await user.generateToken();
       return {user, token}
     } catch (error) {
-      new Error(error.message)
+      console.log(error.message);
+      return {error:error.message}
     }
 };

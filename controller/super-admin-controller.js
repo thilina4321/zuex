@@ -12,7 +12,7 @@ exports.createSuperAdmin = async (req, res) => {
     const {user, error} = await signupHelper.userSignUp(
       email,
       password,
-      contactNumber,
+      contactNumber, 
       userName, 
       UserType.SUPER_ADMIN
     );
@@ -36,6 +36,9 @@ exports.loginSuperAdmin = async (req, res) => {
 
   try {
     const { user, token,error } = await loginHelper.userLogin(data, User);
+    if(user.role != UserType.SUPER_ADMIN){
+      return res.status(404).send({error:'user not find'})
+    }
     if(error){
       return res.status(500).send({error:error.message});
     }
@@ -46,7 +49,6 @@ exports.loginSuperAdmin = async (req, res) => {
 
 exports.createServiceAgent = async (req, res) => {
   const { email, password, contactNumber, userName } = req.body;
-  console.log(req.user);
   try {
     const {user, error} = await signupHelper.userSignUp(
       email,
@@ -99,12 +101,12 @@ exports.customers = async (req, res) => {
 
 
 exports.deleteCustomer = async(req,res)=>{
-  const {id} = req.body
+  const id = req.params.id
   try {
     await User.findByIdAndDelete(id)
     res.send({message:'Delete customer successfully'})
   } catch (error) {
-    res.status(500).send(error.message)
+    res.status(500).send({error:error.message})
   }
 
 }
@@ -120,7 +122,7 @@ exports.updateCustomer = async(req,res)=>{
 }
 
 
-// vehicle section started
+// vehicle section 
 
 exports.addVehicle = async (req, res) => {
   const { carNumber, carYear, carColor, owner } = req.body;
@@ -143,7 +145,7 @@ exports.addVehicle = async (req, res) => {
 exports.vehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.find();
-    res.send(vehicles);
+    res.send({vehicles});
   } catch (error) {
     res.status(500).send("Server Error");
   }
@@ -167,7 +169,7 @@ exports.editVehicle = async (req, res) => {
 
 exports.deleteVehicle = async (req, res) => {
 
-  const {id} = req.body
+  const id = req.params.id
 
   try {
     const { user, error } = await customerHelper.deleteVehicleHelper(id);
@@ -185,16 +187,15 @@ exports.deleteVehicle = async (req, res) => {
 
 exports.searchServiceRecords = async (req, res) => {
   const match = {};
-  const query = req.query;
-  const { customerId, vehicleId } = req.body;
+  const {customerId, vehicleId} = req.query;
 
-  if (query) {
-    if (query.customerId) {
+    if (customerId) {
       match.customerId = customerId;
-    } else if (query.vehicleId) {
+    } 
+    if (vehicleId) {
       match.vehicleId = vehicleId;
     }
-  }
+  
 
   try {
     const searchRecords = await ServiceRecord.find(match);
@@ -204,7 +205,7 @@ exports.searchServiceRecords = async (req, res) => {
   }
 };
 
-exports.recordsOfUser = async()=>{
+exports.recordsOfUser = async(req,res)=>{
     const id = req.params.id
 
     try {
@@ -213,8 +214,8 @@ exports.recordsOfUser = async()=>{
           .populate("records")
           .execPopulate();
         
-        return {serviceRecords}
+        res.send({serviceRecords})
       } catch (error) {
-        return {error:error.message}
+        res.status(500).send({error:error.message})
       }
 }
