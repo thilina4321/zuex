@@ -10,7 +10,11 @@ const user = new Schema({
     type: String,
     required: [true, "Email required"],
     unique: true,
-    
+    validate(value) {
+      if (!validator.isEmail(value)) {
+        throw new Error("Please Enter valid Email");
+      }
+    },
   },
   password: {
     type: String,
@@ -18,11 +22,7 @@ const user = new Schema({
     
   },
   userName: { type: String, required: [true, "User name required"],
-  validate(value){
-    if(value.length != 5){
-      throw new Error("Please character");
-    }
-  }
+  
  },
   contactNumber: { type: String },
   role: {
