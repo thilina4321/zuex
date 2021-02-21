@@ -10,11 +10,7 @@ const user = new Schema({
     type: String,
     required: [true, "Email required"],
     unique: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Please Enter valid Email");
-      }
-    },
+    
   },
   password: {
     type: String,
