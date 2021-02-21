@@ -19,6 +19,7 @@ const appointment = new Schema({
     type:Date
   }
 });
+
 //new Date("2020-01-12").toString().slice(0,15)
 
 module.exports = mongoose.model("appointment", appointment);

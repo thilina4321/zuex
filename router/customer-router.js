@@ -9,7 +9,7 @@ router.post('/signup', customerController.registerCustomer)
 router.post('/login', customerController.loginCustomer)
 
 router.post('/add-vehicle',[Auth, Customer], customerController.addVehicle)
-router.patch('/update-vehicle',[Auth, Customer], customerController.editVehicle)
+router.patch('/update-vehicle/:id',[Auth, Customer], customerController.editVehicle)
 router.delete('/delete-vehicle/:id',[Auth, Customer], customerController.deleteVehicle)
 router.get('/search',[Auth, Customer], customerController.viewServiceRecords)
 

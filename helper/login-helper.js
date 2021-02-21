@@ -3,11 +3,16 @@ const User = require('../model/auth-model')
 exports.userLogin = async(data) => {
   
     try {
-      const user = await User.loginWithEmailAndPassword(data);
-      const token = await user.generateToken();
+      const {user, error} = await User.loginWithEmailAndPassword(data);
+      if(error){
+        return {error}
+      }
+      const {token, tError} = await user.generateToken();
+      if(tError){
+        return {error:tError}
+      }
       return {user, token}
     } catch (error) {
-      console.log(error.message);
       return {error:error.message}
     }
 };

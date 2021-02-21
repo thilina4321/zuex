@@ -10,8 +10,8 @@ router.post('/login', serviceRecordsControler.loginServiceAgent)
 // records
 router.post('/create-record',[Auth, Agent], serviceRecordsControler.createServiceRecord)
 router.patch('/update-record/:id',[Auth, Agent], serviceRecordsControler.updateServiceRecord)
-router.get('/search-record',[Auth, Agent], serviceRecordsControler.searchServiceRecords)
 router.delete('/delete-record/:id',[Auth, Agent], serviceRecordsControler.deleteServiceRecords)
+router.get('/search-record',[Auth, Agent], serviceRecordsControler.searchServiceRecords)
 router.patch('/appointment/:id',[Auth, Agent], serviceRecordsControler.approveOrRejectAppointment)
 router.get('/appointments',[Auth, Agent], serviceRecordsControler.getAllAppointments)
 

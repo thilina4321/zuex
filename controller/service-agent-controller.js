@@ -9,7 +9,12 @@ exports.loginServiceAgent = async (req, res) => {
   const data = req.body;
 
   try {
-    const { user, token } = await loginHelper.userLogin(data, User);
+    const { user, token, error } = await loginHelper.userLogin(data, User);
+
+    if(error){
+      return res.status(404).send({ error });
+    }
+
     if (user.role != UserType.SERVICE_AGENT) {
       return res.status(404).send({ error: "user not find" });
     }

@@ -14,17 +14,16 @@ router.post('/create-service-agent',[Auth, Admin], superAdminController.createSe
 // customer routes
 router.post('/create-customer',[Auth,Admin], superAdminController.createCustomer)
 router.get('/customers',[Auth,Admin], superAdminController.customers)
-router.delete('/delete-customer',[Auth,Admin], superAdminController.deleteCustomer)
-router.patch('/update-customer',[Auth,Admin], superAdminController.updateCustomer)
+router.delete('/delete-customer/:id',[Auth,Admin], superAdminController.deleteCustomer)
+router.patch('/update-customer/:id',[Auth,Admin], superAdminController.updateCustomer)
 
 // vehicle routes 
 router.post('/add-vehicle', [Auth,Admin], superAdminController.addVehicle)
 router.get('/vehicles',[Auth,Admin], superAdminController.vehicles)
-router.delete('/delete-vehicle', [Auth,Admin], superAdminController.deleteVehicle)
-router.patch('/edit-vehicle', [Auth,Admin], superAdminController.editVehicle)
-
+router.patch('/edit-vehicle/:id', [Auth,Admin], superAdminController.editVehicle)
+ 
 //service records
 router.get('/records', [Auth,Admin], superAdminController.searchServiceRecords)
-router.get('/records/:id', [Auth,Admin], superAdminController.recordsOfUser)
+router.get('/record/:id', [Auth,Admin], superAdminController.recordsOfUser)
 
 module.exports = router  

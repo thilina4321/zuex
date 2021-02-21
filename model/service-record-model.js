@@ -15,6 +15,7 @@ const serviceRecord = new Schema(
     vehicleId: { type: Schema.Types.ObjectId, ref: "vehicle" },
     servicePrice:{type:Number, required:true},
     paid:{type:Number, default:0},
+    CurrentMileage:{type:Number},
     paymentStatus:{type:String, enum:Payment, default:Payment.NOT_PAID},
   }
 );

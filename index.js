@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+require('dotenv').config()
 
 const superAdminRouter = require("./router/super-admin.router");
 const serviceAgentRouter = require('./router/service-agent')
@@ -15,14 +16,14 @@ app.use("/customer", customerRouter);
 
 
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
   mongoose
-    .connect("mongodb://127.0.0.1:27017/car-service", {
+    .connect(process.env.DATABASE_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
     .then(() => {
-      console.log("connect to server and database ", port);
+      console.log("connect to server and database ", process.env.PORT);
     })
     .catch((error) => {
       console.log(error);

@@ -12,20 +12,22 @@ const user = new Schema({
     unique: true,
     validate(value) {
       if (!validator.isEmail(value)) {
-        new Error("Please Enter valid Email");
+        throw new Error("Please Enter valid Email");
       }
     },
   },
   password: {
     type: String,
     required: [true, "Password required"],
-    validate(value) {
-      if (value.length < 5) {
-        new Error("Password should contain at least 5 characters");
-      }
-    },
+    
   },
-  userName: { type: String, required: [true, "User name required"] },
+  userName: { type: String, required: [true, "User name required"],
+  validate(value){
+    if(value.length != 5){
+      throw new Error("Please character");
+    }
+  }
+ },
   contactNumber: { type: String },
   role: {
     type: String,
@@ -34,12 +36,6 @@ const user = new Schema({
   tokens: [{ token: String }],
 });
 
-
-user.virtual('records', {
-  ref:'serviceRecord',
-  localField:'_id',
-  foreignField:'customerId'
-})
 
 user.virtual('apointments', {
   ref:'appointment',
@@ -50,15 +46,15 @@ user.virtual('apointments', {
 user.statics.loginWithEmailAndPassword = async (credential) => {
   const user = await User.findOne({ email: credential.email });
   if (!user) {
-    throw new Error("Invalid email address");
+    return {error:'Invalid email address'}
   }
 
   const compare = await bcrypt.compare(credential.password, user.password);
   if (!compare) {
-    throw new Error("Invalid password");
+    return {error:'Invalid password'}
   }
 
-  return user;
+  return {user};
 };
 
 user.methods.toJSON = function () {
@@ -75,12 +71,12 @@ user.methods.generateToken = async function () {
   const user = this;
 
   try {
-    const token = jwt.sign({ id: user._id }, "thisisthesecretkey");
+    const token = jwt.sign({ id: user._id }, process.env.SECURE_KEY);
     user.tokens = user.tokens.concat({ token });
     await user.save();
-    return token;
+    return {token};
   } catch (error) {
-    new Error(error.message)
+    return {error:error.message}
   }
 };
 

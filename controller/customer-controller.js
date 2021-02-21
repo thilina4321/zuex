@@ -35,8 +35,12 @@ exports.loginCustomer = async (req, res) => {
 
   try {
     const { user, token, error } = await loginHelper.userLogin(data);
+    
     if(error){
       return res.status(422).send({error})
+    }
+    if(user.role != UserType.CUSTOMER){
+      return res.status(404).send({error:'user not find'})
     }
     
     res.send({ user, token });
@@ -65,9 +69,10 @@ exports.addVehicle = async (req, res) => {
 
 exports.editVehicle = async (req, res) => {
   const data = req.body;
+  const id = req.params.id
 
   try {
-    const { updatedVehicle, error } = await customerHelper.editVehicleHelper(data.id, data);
+    const { updatedVehicle, error } = await customerHelper.editVehicleHelper(id, data);
     if (error) {
       return res.status(500).send(error.message);
     }

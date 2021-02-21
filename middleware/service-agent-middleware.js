@@ -5,7 +5,7 @@ const UserType  = require('../enum/userType')
 const auth = async (req, res, next) => {
   const token = req.header("Authorization").replace("Bearer ", "");
   try {
-    const decordedToken = await jwt.verify(token, "thisisthesecretkey");
+    const decordedToken = await jwt.verify(token, process.env.SECURE_KEY);
     const user = await Auth.findOne({
       _id: decordedToken.id,
       "tokens.token": token,
